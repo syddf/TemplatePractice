@@ -1,0 +1,8 @@
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(CompileTimeString)
+set(CMAKE_CXX_STANDARD 17)
+AUX_SOURCE_DIRECTORY(. SRC_LIST)
+foreach(target ${SOURCE_LIST})
+	list(APPEND SRC_LIST ${target})
+endforeach()
+ADD_EXECUTABLE(ctString ${SRC_LIST})
