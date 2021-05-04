@@ -1,5 +1,7 @@
 #include <string_view>
 
+template<typename T> constexpr auto GetTypeNameHelperFunc(T);
+
 template<typename CharType, CharType... chars>
 struct CTStringBase
 {
@@ -65,10 +67,44 @@ constexpr auto RemoveSuffix(CTStringBase<CharType, FirstChar, RemainChars...>)
 		return Concat(CTStringBase<CharType, FirstChar>(), RemoveSuffix<N>(CTStringBase<CharType, RemainChars...>()));
 }
 
+template<typename Str1, typename Str2, typename ... Strs>
+constexpr auto Concat(Str1, Str2, Strs...)
+{
+	return Concat(Concat(Str1(), Str2()), Strs()...);
+}
+
+template<typename T, size_t ... ind>
+constexpr auto GetTypeNameFunc(T t, std::index_sequence<ind...>)
+{
+	constexpr std::basic_string_view View = __FUNCSIG__;
+	auto res = CTStringBase<char, View[ind]...>();
+	constexpr size_t suffixLength = sizeof...(ind) - 21 - (sizeof...(ind) - 26) / 2;
+	return RemoveSuffix<suffixLength>(RemovePrefix<21>(res));
+}
+
+template<typename T>
+constexpr auto GetTypeNameFunc(T t)
+{
+	constexpr std::basic_string_view View = __FUNCSIG__;
+	std::index_sequence<View.size()> seq;
+	return GetTypeNameFunc(T(), std::make_index_sequence<View.size()>());
+}
+
+template<typename T>
+struct ABCDEFG
+{
+
+};
+
 int main()
 {
 	auto s = CTString("baabs");
 	auto ss = RemovePrefix<1>(s);
 	auto sss = RemoveSuffix<3>(s);
+	auto ssss = Concat(s, ss, sss);
+
+	auto testType = GetTypeNameFunc(ABCDEFG<int>());
+	auto str = testType.Data;
+	testType.Size;
 	return 0;
 }
